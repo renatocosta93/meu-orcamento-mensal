@@ -2,123 +2,157 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projeto Orçamento Mensal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meu Orçamento</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #f4f7f6;
+            --bg-color: #f3f4f6;
             --card-bg: #ffffff;
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --success: #27ae60;
-            --danger: #e74c3c;
-            --text: #333333;
-            --border: #e0e0e0;
+            --primary: #4f46e5; /* Índigo moderno */
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-dark: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         
-        body { background-color: var(--bg-color); color: var(--text); padding: 20px; }
+        body { background-color: var(--bg-color); color: var(--text-dark); padding: 15px; padding-bottom: 40px; }
         
         .container { max-width: 1200px; margin: 0 auto; display: grid; gap: 20px; grid-template-columns: 1fr; }
         @media (min-width: 900px) { .container { grid-template-columns: 2fr 1fr; } }
         
-        header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        header { display: flex; flex-direction: column; gap: 15px; background: var(--primary); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; text-align: center; }
+        @media (min-width: 600px) { header { flex-direction: row; justify-content: space-between; align-items: center; text-align: left; } }
         
-        .month-selector { display: flex; align-items: center; gap: 10px; }
-        .month-selector input { padding: 8px; border: 1px solid var(--border); border-radius: 5px; font-size: 16px; }
+        .month-selector { display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 8px; }
+        .month-selector input { padding: 8px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; outline: none; }
         
-        .card { background: var(--card-bg); padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); margin-bottom: 20px; border: 1px solid var(--border); }
         
-        .card-title { font-size: 1.2rem; color: var(--primary); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .card-title { font-size: 1.1rem; font-weight: 600; color: var(--text-dark); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
+        /* Adaptação da Tabela para Mobile */
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border); }
-        th { color: #7f8c8d; font-weight: normal; font-size: 0.9rem; }
+        th { color: var(--text-muted); font-weight: 500; font-size: 0.85rem; text-align: left; padding: 10px 5px; }
+        td { padding: 8px 5px; border-bottom: 1px solid var(--border); }
         
-        input[type="text"], input[type="number"] { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; transition: border 0.3s; }
-        input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: var(--accent); }
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr { display: block; width: 100%; }
+            thead { display: none; } /* Esconde títulos no celular */
+            tr { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; background: #fafafa; }
+            td { padding: 0; border: none; }
+            td:nth-child(1) { width: 100%; } /* Descrição */
+            td:nth-child(2) { width: calc(100% - 50px); } /* Valor */
+            td:nth-child(3) { width: 40px; display: flex; justify-content: flex-end; } /* Botão Lixeira */
+        }
         
-        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background 0.3s; color: white; }
-        .btn-add { background-color: var(--accent); }
-        .btn-add:hover { background-color: #2980b9; }
-        .btn-remove { background-color: var(--danger); padding: 5px 10px; font-weight: bold;}
-        .btn-remove:hover { background-color: #c0392b; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; background: var(--card-bg); transition: border 0.2s; }
+        input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2); }
         
-        .subtotal { text-align: right; font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-add { background-color: var(--primary); color: white; }
+        .btn-add:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn-remove { background-color: #fee2e2; color: var(--danger); padding: 12px; border-radius: 8px; }
+        .btn-remove:hover { background-color: #fecaca; }
         
-        .resumo-card { position: sticky; top: 20px; }
-        .resumo-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border); font-size: 1.1rem; }
-        .resumo-total { font-size: 1.5rem; font-weight: bold; padding-top: 15px; color: var(--success); }
-        .negativo { color: var(--danger); }
+        .subtotal { text-align: right; font-weight: bold; color: var(--text-muted); font-size: 1rem; margin-top: 10px; }
+        .subtotal span { color: var(--text-dark); font-size: 1.1rem; }
         
-        .chart-container { margin-top: 20px; }
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+        .resumo-card { position: sticky; top: 20px; background: linear-gradient(145deg, #ffffff, #f9fafb); }
+        .resumo-item { display: flex; justify-content: space-between; padding: 12px 0; font-size: 1.05rem; font-weight: 500; }
+        .resumo-total { font-size: 1.4rem; font-weight: bold; padding-top: 15px; border-top: 2px dashed var(--border); margin-top: 10px; }
+        .valor-positivo { color: var(--success); }
+        .valor-negativo { color: var(--danger); }
+        
+        /* Painel da Inteligência Artificial */
+        .insight-box { padding: 15px; border-radius: 12px; background: #f0fdf4; border-left: 5px solid var(--success); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; color: var(--text-dark); display: flex; gap: 10px; align-items: flex-start; }
+        .insight-icon { font-size: 1.5rem; }
+        
+        .chart-container { margin-top: 20px; width: 100%; overflow: hidden; }
     </style>
 </head>
 <body>
 
-<div style="max-width: 1200px; margin: 0 auto;">
+<div class="container">
     <header>
-        <h1>Painel de Orçamento</h1>
+        <div>
+            <h1 style="font-size: 1.5rem; margin-bottom: 5px;">💰 Meu Orçamento</h1>
+            <p style="font-size: 0.9rem; opacity: 0.8;">Gestão Financeira Inteligente</p>
+        </div>
         <div class="month-selector">
-            <label for="mesAtual">Mês de Referência:</label>
+            <label for="mesAtual">Mês:</label>
             <input type="month" id="mesAtual">
         </div>
     </header>
 
     <div class="container">
+        <!-- Lado Esquerdo: Lançamentos -->
         <div class="lancamentos">
+            
             <div class="card">
-                <div class="card-title">Salário do Mês <button class="btn btn-add" onclick="adicionarLinha('salario')">+ Adicionar Receita</button></div>
+                <div class="card-title"><span>💵 Renda do Mês</span> <button class="btn btn-add" onclick="adicionarLinha('salario')">➕ Novo</button></div>
                 <table>
-                    <thead><tr><th>Descrição</th><th>Valor (R$)</th><th style="width: 50px;">Ação</th></tr></thead>
+                    <thead><tr><th>Descrição (Onde você ganha)</th><th>Valor (R$)</th><th></th></tr></thead>
                     <tbody id="tabela-salario"></tbody>
                 </table>
-                <div class="subtotal">Subtotal: R$ <span id="sub-salario">0.00</span></div>
+                <div class="subtotal">Total Renda: R$ <span id="sub-salario">0.00</span></div>
             </div>
 
             <div class="card">
-                <div class="card-title">Despesas Fixas <button class="btn btn-add" onclick="adicionarLinha('fixas')">+ Adicionar Despesa</button></div>
+                <div class="card-title"><span>🏠 Despesas Fixas</span> <button class="btn btn-add" onclick="adicionarLinha('fixas')">➕ Nova</button></div>
                 <table>
-                    <thead><tr><th>Descrição</th><th>Valor (R$)</th><th style="width: 50px;">Ação</th></tr></thead>
+                    <thead><tr><th>Descrição (Contas de casa, etc)</th><th>Valor (R$)</th><th></th></tr></thead>
                     <tbody id="tabela-fixas"></tbody>
                 </table>
-                <div class="subtotal">Subtotal: R$ <span id="sub-fixas">0.00</span></div>
+                <div class="subtotal">Total Fixas: R$ <span id="sub-fixas">0.00</span></div>
             </div>
 
             <div class="card">
-                <div class="card-title">Despesas Variáveis <button class="btn btn-add" onclick="adicionarLinha('variaveis')">+ Adicionar Despesa</button></div>
+                <div class="card-title"><span>🛒 Despesas Variáveis</span> <button class="btn btn-add" onclick="adicionarLinha('variaveis')">➕ Nova</button></div>
                 <table>
-                    <thead><tr><th>Descrição</th><th>Valor (R$)</th><th style="width: 50px;">Ação</th></tr></thead>
+                    <thead><tr><th>Descrição (Mercado, lazer, etc)</th><th>Valor (R$)</th><th></th></tr></thead>
                     <tbody id="tabela-variaveis"></tbody>
                 </table>
-                <div class="subtotal">Subtotal: R$ <span id="sub-variaveis">0.00</span></div>
+                <div class="subtotal">Total Variáveis: R$ <span id="sub-variaveis">0.00</span></div>
             </div>
 
             <div class="card">
-                <div class="card-title">Cartão de Crédito <button class="btn btn-add" onclick="adicionarLinha('cartao')">+ Adicionar Despesa</button></div>
+                <div class="card-title"><span>💳 Cartão de Crédito</span> <button class="btn btn-add" onclick="adicionarLinha('cartao')">➕ Nova</button></div>
                 <table>
-                    <thead><tr><th>Descrição</th><th>Valor (R$)</th><th style="width: 50px;">Ação</th></tr></thead>
+                    <thead><tr><th>Descrição (Fatura ou parcela)</th><th>Valor (R$)</th><th></th></tr></thead>
                     <tbody id="tabela-cartao"></tbody>
                 </table>
-                <div class="subtotal">Subtotal: R$ <span id="sub-cartao">0.00</span></div>
+                <div class="subtotal">Total Cartão: R$ <span id="sub-cartao">0.00</span></div>
             </div>
         </div>
 
+        <!-- Lado Direito: Resumo e Gráficos -->
         <div class="sidebar">
             <div class="card resumo-card">
-                <h2 class="card-title">Resumo do Mês</h2>
+                
+                <!-- Assistente Inteligente -->
+                <div id="insight-box" class="insight-box">
+                    <div class="insight-icon">🤖</div>
+                    <div id="insight-text">Preencha seus valores para que eu possa analisar o seu mês.</div>
+                </div>
+
+                <h2 class="card-title">📊 Resumo do Mês</h2>
                 <div class="resumo-item">
-                    <span>Total de Receitas:</span>
-                    <strong style="color: var(--success);">R$ <span id="resumo-receitas">0.00</span></strong>
+                    <span>Receitas:</span>
+                    <strong class="valor-positivo">R$ <span id="resumo-receitas">0.00</span></strong>
                 </div>
                 <div class="resumo-item">
-                    <span>Total de Despesas:</span>
-                    <strong style="color: var(--danger);">R$ <span id="resumo-despesas">0.00</span></strong>
+                    <span>Despesas:</span>
+                    <strong class="valor-negativo">R$ <span id="resumo-despesas">0.00</span></strong>
                 </div>
                 <div class="resumo-item resumo-total" id="caixa-saldo">
-                    <span>Total após sobra:</span>
+                    <span>Saldo Final:</span>
                     <span>R$ <span id="resumo-saldo">0.00</span></span>
                 </div>
                 
@@ -153,7 +187,7 @@
 
     function inicializarMesSeNecessario() {
         if (!dadosApp[mesAtual]) {
-            dadosApp[mesAtual] = { salario: [{ desc: 'Salário', valor: 0 }], fixas: [], variaveis: [], cartao: [] };
+            dadosApp[mesAtual] = { salario: [{ desc: 'Salário Principal', valor: 0 }], fixas: [], variaveis: [], cartao: [] };
         }
     }
 
@@ -161,7 +195,7 @@
         inicializarMesSeNecessario();
         renderizarTabela('salario'); renderizarTabela('fixas');
         renderizarTabela('variaveis'); renderizarTabela('cartao');
-        calcularTotais(); atualizarGrafico();
+        calcularTotais();
     }
 
     function renderizarTabela(categoria) {
@@ -170,16 +204,16 @@
         dadosApp[mesAtual][categoria].forEach((item, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><input type="text" value="${item.desc}" oninput="atualizarDado('${categoria}', ${index}, 'desc', this.value)" placeholder="Descrição"></td>
+                <td><input type="text" value="${item.desc}" oninput="atualizarDado('${categoria}', ${index}, 'desc', this.value)" placeholder="Nome da despesa/renda"></td>
                 <td><input type="number" value="${item.valor}" oninput="atualizarDado('${categoria}', ${index}, 'valor', this.value)" placeholder="0.00" step="0.01"></td>
-                <td><button class="btn btn-remove" onclick="removerLinha('${categoria}', ${index})">X</button></td>
+                <td><button class="btn btn-remove" onclick="removerLinha('${categoria}', ${index})">🗑️</button></td>
             `;
             tbody.appendChild(tr);
         });
     }
 
     function adicionarLinha(categoria) {
-        dadosApp[mesAtual][categoria].push({ desc: '', valor: 0 });
+        dadosApp[mesAtual][categoria].push({ desc: '', valor: '' });
         renderizarTabela(categoria); salvarDados();
     }
 
@@ -194,8 +228,8 @@
             calcularTotais();
         } else {
             dadosApp[mesAtual][categoria][index][campo] = valor;
+            salvarDados();
         }
-        salvarDados();
     }
 
     function calcularTotais() {
@@ -219,12 +253,45 @@
 
         const caixaSaldo = document.getElementById('caixa-saldo');
         if (saldo < 0) {
-            caixaSaldo.classList.add('negativo'); caixaSaldo.classList.remove('positivo');
+            caixaSaldo.classList.add('valor-negativo'); caixaSaldo.classList.remove('valor-positivo');
         } else {
-            caixaSaldo.classList.remove('negativo'); caixaSaldo.classList.add('positivo');
-            caixaSaldo.style.color = "var(--success)";
+            caixaSaldo.classList.remove('valor-negativo'); caixaSaldo.classList.add('valor-positivo');
         }
+        
+        gerarPerspectivaIA(subSalario, totalDespesas, saldo);
         salvarDados();
+    }
+
+    function gerarPerspectivaIA(renda, despesas, saldo) {
+        const insightBox = document.getElementById('insight-box');
+        const insightText = document.getElementById('insight-text');
+        
+        if (renda === 0 && despesas === 0) {
+            insightBox.style.borderLeftColor = "var(--text-muted)";
+            insightBox.style.backgroundColor = "#f3f4f6";
+            insightText.innerHTML = "<strong>Assistente:</strong> Preencha seus valores para que eu possa analisar o seu mês.";
+            return;
+        }
+
+        const percentualGasto = renda > 0 ? (despesas / renda) * 100 : 100;
+        
+        if (saldo < 0) {
+            insightBox.style.borderLeftColor = "var(--danger)";
+            insightBox.style.backgroundColor = "#fef2f2";
+            insightText.innerHTML = `🚨 <strong>Alerta Vermelho!</strong> Você ultrapassou sua renda em R$ ${Math.abs(saldo).toFixed(2)}. Revise suas despesas variáveis urgentemente.`;
+        } else if (percentualGasto >= 80) {
+            insightBox.style.borderLeftColor = "var(--warning)";
+            insightBox.style.backgroundColor = "#fffbeb";
+            insightText.innerHTML = `⚠️ <strong>Atenção:</strong> Você já comprometeu ${percentualGasto.toFixed(1)}% do seu salário. Evite novos gastos no cartão de crédito este mês.`;
+        } else if (percentualGasto >= 50) {
+            insightBox.style.borderLeftColor = "var(--primary)";
+            insightBox.style.backgroundColor = "#eef2ff";
+            insightText.innerHTML = `👍 <strong>Tudo sob controle!</strong> Você gastou ${percentualGasto.toFixed(1)}% da sua renda. Que tal investir parte dos R$ ${saldo.toFixed(2)} que sobraram?`;
+        } else {
+            insightBox.style.borderLeftColor = "var(--success)";
+            insightBox.style.backgroundColor = "#f0fdf4";
+            insightText.innerHTML = `🌟 <strong>Excelente!</strong> Seus gastos estão muito baixos (${percentualGasto.toFixed(1)}%). Você tem um cenário financeiro altamente saudável este mês!`;
+        }
     }
 
     function salvarDados() {
@@ -246,16 +313,24 @@
         if (grafico) { grafico.destroy(); }
 
         grafico = new Chart(ctx, {
-            type: 'line',
+            type: 'bar', // Mudado para barra para visualização mobile mais limpa
             data: {
-                labels: meses,
+                labels: meses.map(m => m.split('-').reverse().join('/')), // Formata ano-mes para mes/ano
                 datasets: [
-                    { label: 'Despesas', data: historicoDespesas, borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
-                    { label: 'Receitas', data: historicoReceitas, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
+                    { label: 'Renda', data: historicoReceitas, backgroundColor: '#10b981', borderRadius: 4 },
+                    { label: 'Despesas', data: historicoDespesas, backgroundColor: '#ef4444', borderRadius: 4 }
                 ]
             },
-            options: { responsive: true, plugins: { title: { display: true, text: 'Evolução Mensal' } } }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+            }
         });
+        
+        // Ajusta a altura do gráfico para telas de celular
+        document.querySelector('.chart-container').style.height = '250px';
     }
 </script>
 </body>
