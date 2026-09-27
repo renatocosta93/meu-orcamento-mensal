@@ -7,160 +7,157 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #f3f4f6;
+            --bg-color: #f0f2f5;
             --card-bg: #ffffff;
-            --primary: #4f46e5; /* Índigo moderno */
-            --primary-hover: #4338ca;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --text-dark: #111827;
+            --primary: #4f46e5;
+            --primary-light: #e0e7ff;
+            --success: #059669;
+            --danger: #dc2626;
+            --text-dark: #1f2937;
             --text-muted: #6b7280;
             --border: #e5e7eb;
+            --bottom-nav-height: 70px; /* Altura da barra inferior */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         
-        body { background-color: var(--bg-color); color: var(--text-dark); padding: 15px; padding-bottom: 40px; }
+        body { background-color: var(--bg-color); color: var(--text-dark); padding-bottom: calc(var(--bottom-nav-height) + 20px); font-size: 14px; }
         
-        .container { max-width: 1200px; margin: 0 auto; display: grid; gap: 20px; grid-template-columns: 1fr; }
-        @media (min-width: 900px) { .container { grid-template-columns: 2fr 1fr; } }
+        /* Cabeçalho Compacto */
+        header { background: var(--card-bg); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--primary); font-size: 1.1rem; }
+        .month-selector input { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-weight: 600; background: var(--bg-color); color: var(--text-dark); outline: none; }
         
-        header { display: flex; flex-direction: column; gap: 15px; background: var(--primary); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; text-align: center; }
-        @media (min-width: 600px) { header { flex-direction: row; justify-content: space-between; align-items: center; text-align: left; } }
+        .container { max-width: 800px; margin: 15px auto; padding: 0 10px; }
+
+        /* Inteligência Artificial Compacta */
+        .insight-box { padding: 10px 12px; border-radius: 8px; background: #ecfdf5; border-left: 4px solid var(--success); margin-bottom: 15px; font-size: 0.85rem; color: var(--text-dark); display: flex; gap: 10px; align-items: center; }
+        .insight-box.alerta { background: #fef2f2; border-left-color: var(--danger); }
+        .insight-box.atencao { background: #fffbeb; border-left-color: #f59e0b; }
+
+        /* Navegação por Abas (Tabs) */
+        .tabs { display: flex; background: var(--card-bg); border-radius: 10px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .tab-btn { flex: 1; padding: 12px 5px; border: none; background: transparent; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: 0.2s; border-bottom: 3px solid transparent; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Lista de Lançamentos Compacta */
+        .lancamento-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+        .lancamento-titulo { font-weight: 600; font-size: 1rem; color: var(--text-dark); }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
         
-        .month-selector { display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 8px; }
-        .month-selector input { padding: 8px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; outline: none; }
+        .lancamento-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; background: var(--card-bg); padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
+        .lancamento-item input[type="text"] { flex: 2; min-width: 0; }
+        .lancamento-item input[type="number"] { flex: 1; min-width: 70px; max-width: 100px; text-align: right; }
+        input { border: none; background: transparent; font-size: 14px; padding: 4px; outline: none; border-bottom: 1px dashed transparent; }
+        input:focus { border-bottom-color: var(--primary); }
         
-        .card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); margin-bottom: 20px; border: 1px solid var(--border); }
+        .btn-remove { background: #fee2e2; color: var(--danger); border: none; width: 28px; height: 28px; border-radius: 6px; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0; font-size: 0.9rem; }
         
-        .card-title { font-size: 1.1rem; font-weight: 600; color: var(--text-dark); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        
-        /* Adaptação da Tabela para Mobile */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th { color: var(--text-muted); font-weight: 500; font-size: 0.85rem; text-align: left; padding: 10px 5px; }
-        td { padding: 8px 5px; border-bottom: 1px solid var(--border); }
-        
-        @media (max-width: 768px) {
-            table, thead, tbody, th, td, tr { display: block; width: 100%; }
-            thead { display: none; } /* Esconde títulos no celular */
-            tr { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; background: #fafafa; }
-            td { padding: 0; border: none; }
-            td:nth-child(1) { width: 100%; } /* Descrição */
-            td:nth-child(2) { width: calc(100% - 50px); } /* Valor */
-            td:nth-child(3) { width: 40px; display: flex; justify-content: flex-end; } /* Botão Lixeira */
-        }
-        
-        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; background: var(--card-bg); transition: border 0.2s; }
-        input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2); }
-        
-        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-add { background-color: var(--primary); color: white; }
-        .btn-add:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
-        .btn-remove { background-color: #fee2e2; color: var(--danger); padding: 12px; border-radius: 8px; }
-        .btn-remove:hover { background-color: #fecaca; }
-        
-        .subtotal { text-align: right; font-weight: bold; color: var(--text-muted); font-size: 1rem; margin-top: 10px; }
-        .subtotal span { color: var(--text-dark); font-size: 1.1rem; }
-        
-        .sidebar { display: flex; flex-direction: column; gap: 20px; }
-        .resumo-card { position: sticky; top: 20px; background: linear-gradient(145deg, #ffffff, #f9fafb); }
-        .resumo-item { display: flex; justify-content: space-between; padding: 12px 0; font-size: 1.05rem; font-weight: 500; }
-        .resumo-total { font-size: 1.4rem; font-weight: bold; padding-top: 15px; border-top: 2px dashed var(--border); margin-top: 10px; }
-        .valor-positivo { color: var(--success); }
-        .valor-negativo { color: var(--danger); }
-        
-        /* Painel da Inteligência Artificial */
-        .insight-box { padding: 15px; border-radius: 12px; background: #f0fdf4; border-left: 5px solid var(--success); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; color: var(--text-dark); display: flex; gap: 10px; align-items: flex-start; }
-        .insight-icon { font-size: 1.5rem; }
-        
-        .chart-container { margin-top: 20px; width: 100%; overflow: hidden; }
+        .subtotal-area { text-align: right; font-size: 0.85rem; color: var(--text-muted); padding: 10px; background: var(--card-bg); border-radius: 8px; margin-top: 10px; font-weight: 500; }
+        .subtotal-area span { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); }
+
+        /* Resumo Flutuante Inferior (Bottom Bar) */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: var(--bottom-nav-height); background: var(--card-bg); border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-around; align-items: center; padding: 0 15px; z-index: 100; }
+        .bottom-stat { display: flex; flex-direction: column; align-items: center; }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        .stat-value { font-size: 1.1rem; font-weight: 700; }
+        .val-positivo { color: var(--success); }
+        .val-negativo { color: var(--danger); }
+        .stat-main { background: var(--bg-color); padding: 5px 15px; border-radius: 12px; border: 1px solid var(--border); }
+
+        /* Gráfico Compacto */
+        .chart-card { background: var(--card-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-top: 20px; }
+        .chart-container { height: 180px; width: 100%; }
     </style>
 </head>
 <body>
 
+<header>
+    <div class="logo">📊 Orçamento</div>
+    <div class="month-selector"><input type="month" id="mesAtual"></div>
+</header>
+
 <div class="container">
-    <header>
-        <div>
-            <h1 style="font-size: 1.5rem; margin-bottom: 5px;">💰 Meu Orçamento</h1>
-            <p style="font-size: 0.9rem; opacity: 0.8;">Gestão Financeira Inteligente</p>
+    
+    <!-- Assistente Inteligente IA -->
+    <div id="insight-box" class="insight-box">
+        <div>🤖</div>
+        <div id="insight-text">Analisando seus dados...</div>
+    </div>
+
+    <!-- Navegação em Abas -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('tab-renda')"><span>💵</span>Renda</button>
+        <button class="tab-btn" onclick="openTab('tab-fixas')"><span>🏠</span>Fixas</button>
+        <button class="tab-btn" onclick="openTab('tab-variaveis')"><span>🛒</span>Variáveis</button>
+        <button class="tab-btn" onclick="openTab('tab-cartao')"><span>💳</span>Cartão</button>
+    </div>
+
+    <!-- CONTEÚDO DAS ABAS -->
+    
+    <!-- Renda -->
+    <div id="tab-renda" class="tab-content active">
+        <div class="lancamento-header">
+            <span class="lancamento-titulo">Suas Receitas</span>
+            <button class="btn-add" onclick="adicionarLinha('salario')">+ Renda</button>
         </div>
-        <div class="month-selector">
-            <label for="mesAtual">Mês:</label>
-            <input type="month" id="mesAtual">
+        <div id="lista-salario"></div>
+        <div class="subtotal-area">Subtotal: R$ <span id="sub-salario">0.00</span></div>
+    </div>
+
+    <!-- Fixas -->
+    <div id="tab-fixas" class="tab-content">
+        <div class="lancamento-header">
+            <span class="lancamento-titulo">Despesas Fixas</span>
+            <button class="btn-add" onclick="adicionarLinha('fixas')">+ Fixa</button>
         </div>
-    </header>
+        <div id="lista-fixas"></div>
+        <div class="subtotal-area">Subtotal: R$ <span id="sub-fixas">0.00</span></div>
+    </div>
 
-    <div class="container">
-        <!-- Lado Esquerdo: Lançamentos -->
-        <div class="lancamentos">
-            
-            <div class="card">
-                <div class="card-title"><span>💵 Renda do Mês</span> <button class="btn btn-add" onclick="adicionarLinha('salario')">➕ Novo</button></div>
-                <table>
-                    <thead><tr><th>Descrição (Onde você ganha)</th><th>Valor (R$)</th><th></th></tr></thead>
-                    <tbody id="tabela-salario"></tbody>
-                </table>
-                <div class="subtotal">Total Renda: R$ <span id="sub-salario">0.00</span></div>
-            </div>
-
-            <div class="card">
-                <div class="card-title"><span>🏠 Despesas Fixas</span> <button class="btn btn-add" onclick="adicionarLinha('fixas')">➕ Nova</button></div>
-                <table>
-                    <thead><tr><th>Descrição (Contas de casa, etc)</th><th>Valor (R$)</th><th></th></tr></thead>
-                    <tbody id="tabela-fixas"></tbody>
-                </table>
-                <div class="subtotal">Total Fixas: R$ <span id="sub-fixas">0.00</span></div>
-            </div>
-
-            <div class="card">
-                <div class="card-title"><span>🛒 Despesas Variáveis</span> <button class="btn btn-add" onclick="adicionarLinha('variaveis')">➕ Nova</button></div>
-                <table>
-                    <thead><tr><th>Descrição (Mercado, lazer, etc)</th><th>Valor (R$)</th><th></th></tr></thead>
-                    <tbody id="tabela-variaveis"></tbody>
-                </table>
-                <div class="subtotal">Total Variáveis: R$ <span id="sub-variaveis">0.00</span></div>
-            </div>
-
-            <div class="card">
-                <div class="card-title"><span>💳 Cartão de Crédito</span> <button class="btn btn-add" onclick="adicionarLinha('cartao')">➕ Nova</button></div>
-                <table>
-                    <thead><tr><th>Descrição (Fatura ou parcela)</th><th>Valor (R$)</th><th></th></tr></thead>
-                    <tbody id="tabela-cartao"></tbody>
-                </table>
-                <div class="subtotal">Total Cartão: R$ <span id="sub-cartao">0.00</span></div>
-            </div>
+    <!-- Variáveis -->
+    <div id="tab-variaveis" class="tab-content">
+        <div class="lancamento-header">
+            <span class="lancamento-titulo">Despesas Variáveis</span>
+            <button class="btn-add" onclick="adicionarLinha('variaveis')">+ Variável</button>
         </div>
+        <div id="lista-variaveis"></div>
+        <div class="subtotal-area">Subtotal: R$ <span id="sub-variaveis">0.00</span></div>
+    </div>
 
-        <!-- Lado Direito: Resumo e Gráficos -->
-        <div class="sidebar">
-            <div class="card resumo-card">
-                
-                <!-- Assistente Inteligente -->
-                <div id="insight-box" class="insight-box">
-                    <div class="insight-icon">🤖</div>
-                    <div id="insight-text">Preencha seus valores para que eu possa analisar o seu mês.</div>
-                </div>
-
-                <h2 class="card-title">📊 Resumo do Mês</h2>
-                <div class="resumo-item">
-                    <span>Receitas:</span>
-                    <strong class="valor-positivo">R$ <span id="resumo-receitas">0.00</span></strong>
-                </div>
-                <div class="resumo-item">
-                    <span>Despesas:</span>
-                    <strong class="valor-negativo">R$ <span id="resumo-despesas">0.00</span></strong>
-                </div>
-                <div class="resumo-item resumo-total" id="caixa-saldo">
-                    <span>Saldo Final:</span>
-                    <span>R$ <span id="resumo-saldo">0.00</span></span>
-                </div>
-                
-                <div class="chart-container">
-                    <canvas id="graficoHistorico"></canvas>
-                </div>
-            </div>
+    <!-- Cartão -->
+    <div id="tab-cartao" class="tab-content">
+        <div class="lancamento-header">
+            <span class="lancamento-titulo">Cartões de Crédito</span>
+            <button class="btn-add" onclick="adicionarLinha('cartao')">+ Cartão</button>
         </div>
+        <div id="lista-cartao"></div>
+        <div class="subtotal-area">Subtotal: R$ <span id="sub-cartao">0.00</span></div>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="chart-card">
+        <div class="lancamento-titulo" style="margin-bottom: 10px; font-size: 0.9rem;">Evolução Histórica</div>
+        <div class="chart-container"><canvas id="graficoHistorico"></canvas></div>
+    </div>
+
+</div>
+
+<!-- Resumo Flutuante (Bottom Bar) -->
+<div class="bottom-bar">
+    <div class="bottom-stat">
+        <span class="stat-label">Receitas</span>
+        <span class="stat-value val-positivo" id="resumo-receitas">0.00</span>
+    </div>
+    <div class="bottom-stat stat-main">
+        <span class="stat-label">Saldo Restante</span>
+        <span class="stat-value" id="resumo-saldo">0.00</span>
+    </div>
+    <div class="bottom-stat">
+        <span class="stat-label">Despesas</span>
+        <span class="stat-value val-negativo" id="resumo-despesas">0.00</span>
     </div>
 </div>
 
@@ -173,164 +170,106 @@
         const inputMes = document.getElementById('mesAtual');
         const hoje = new Date();
         const mesFormatado = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+        inputMes.value = mesFormatado; mesAtual = mesFormatado;
         
-        inputMes.value = mesFormatado;
-        mesAtual = mesFormatado;
-        
-        inputMes.addEventListener('change', (e) => {
-            mesAtual = e.target.value;
-            carregarDadosDoMes();
-        });
-
+        inputMes.addEventListener('change', (e) => { mesAtual = e.target.value; carregarDadosDoMes(); });
         carregarDadosDoMes();
     };
 
+    function openTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
     function inicializarMesSeNecessario() {
-        if (!dadosApp[mesAtual]) {
-            dadosApp[mesAtual] = { salario: [{ desc: 'Salário Principal', valor: 0 }], fixas: [], variaveis: [], cartao: [] };
-        }
+        if (!dadosApp[mesAtual]) dadosApp[mesAtual] = { salario: [{ desc: 'Salário', valor: '' }], fixas: [], variaveis: [], cartao: [] };
     }
 
     function carregarDadosDoMes() {
         inicializarMesSeNecessario();
-        renderizarTabela('salario'); renderizarTabela('fixas');
-        renderizarTabela('variaveis'); renderizarTabela('cartao');
+        ['salario', 'fixas', 'variaveis', 'cartao'].forEach(cat => renderizarLista(cat));
         calcularTotais();
     }
 
-    function renderizarTabela(categoria) {
-        const tbody = document.getElementById(`tabela-${categoria}`);
-        tbody.innerHTML = '';
+    function renderizarLista(categoria) {
+        const container = document.getElementById(`lista-${categoria}`);
+        container.innerHTML = '';
         dadosApp[mesAtual][categoria].forEach((item, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" value="${item.desc}" oninput="atualizarDado('${categoria}', ${index}, 'desc', this.value)" placeholder="Nome da despesa/renda"></td>
-                <td><input type="number" value="${item.valor}" oninput="atualizarDado('${categoria}', ${index}, 'valor', this.value)" placeholder="0.00" step="0.01"></td>
-                <td><button class="btn btn-remove" onclick="removerLinha('${categoria}', ${index})">🗑️</button></td>
+            container.innerHTML += `
+                <div class="lancamento-item">
+                    <input type="text" value="${item.desc}" oninput="atualizarDado('${categoria}', ${index}, 'desc', this.value)" placeholder="Descrição...">
+                    <input type="number" value="${item.valor}" oninput="atualizarDado('${categoria}', ${index}, 'valor', this.value)" placeholder="R$ 0,00" step="0.01">
+                    <button class="btn-remove" onclick="removerLinha('${categoria}', ${index})">✕</button>
+                </div>
             `;
-            tbody.appendChild(tr);
         });
     }
 
     function adicionarLinha(categoria) {
         dadosApp[mesAtual][categoria].push({ desc: '', valor: '' });
-        renderizarTabela(categoria); salvarDados();
+        renderizarLista(categoria); salvarDados();
     }
 
     function removerLinha(categoria, index) {
         dadosApp[mesAtual][categoria].splice(index, 1);
-        renderizarTabela(categoria); calcularTotais();
+        renderizarLista(categoria); calcularTotais();
     }
 
     function atualizarDado(categoria, index, campo, valor) {
-        if (campo === 'valor') {
-            dadosApp[mesAtual][categoria][index][campo] = parseFloat(valor) || 0;
-            calcularTotais();
-        } else {
-            dadosApp[mesAtual][categoria][index][campo] = valor;
-            salvarDados();
-        }
+        dadosApp[mesAtual][categoria][index][campo] = campo === 'valor' ? parseFloat(valor) || 0 : valor;
+        campo === 'valor' ? calcularTotais() : salvarDados();
     }
 
     function calcularTotais() {
-        const somar = (arr) => arr.reduce((acc, curr) => acc + (parseFloat(curr.valor) || 0), 0);
-        const subSalario = somar(dadosApp[mesAtual].salario);
-        const subFixas = somar(dadosApp[mesAtual].fixas);
-        const subVariaveis = somar(dadosApp[mesAtual].variaveis);
-        const subCartao = somar(dadosApp[mesAtual].cartao);
+        const somar = arr => arr.reduce((acc, curr) => acc + (parseFloat(curr.valor) || 0), 0);
+        const [subS, subF, subV, subC] = [somar(dadosApp[mesAtual].salario), somar(dadosApp[mesAtual].fixas), somar(dadosApp[mesAtual].variaveis), somar(dadosApp[mesAtual].cartao)];
 
-        document.getElementById('sub-salario').innerText = subSalario.toFixed(2);
-        document.getElementById('sub-fixas').innerText = subFixas.toFixed(2);
-        document.getElementById('sub-variaveis').innerText = subVariaveis.toFixed(2);
-        document.getElementById('sub-cartao').innerText = subCartao.toFixed(2);
+        document.getElementById('sub-salario').innerText = subS.toFixed(2);
+        document.getElementById('sub-fixas').innerText = subF.toFixed(2);
+        document.getElementById('sub-variaveis').innerText = subV.toFixed(2);
+        document.getElementById('sub-cartao').innerText = subC.toFixed(2);
 
-        const totalDespesas = subFixas + subVariaveis + subCartao;
-        const saldo = subSalario - totalDespesas;
+        const totalDesp = subF + subV + subC; const saldo = subS - totalDesp;
 
-        document.getElementById('resumo-receitas').innerText = subSalario.toFixed(2);
-        document.getElementById('resumo-despesas').innerText = totalDespesas.toFixed(2);
-        document.getElementById('resumo-saldo').innerText = saldo.toFixed(2);
-
-        const caixaSaldo = document.getElementById('caixa-saldo');
-        if (saldo < 0) {
-            caixaSaldo.classList.add('valor-negativo'); caixaSaldo.classList.remove('valor-positivo');
-        } else {
-            caixaSaldo.classList.remove('valor-negativo'); caixaSaldo.classList.add('valor-positivo');
-        }
+        document.getElementById('resumo-receitas').innerText = subS.toFixed(2);
+        document.getElementById('resumo-despesas').innerText = totalDesp.toFixed(2);
+        const eSaldo = document.getElementById('resumo-saldo');
+        eSaldo.innerText = saldo.toFixed(2);
+        eSaldo.className = `stat-value ${saldo < 0 ? 'val-negativo' : 'val-positivo'}`;
         
-        gerarPerspectivaIA(subSalario, totalDespesas, saldo);
-        salvarDados();
+        gerarPerspectiva(subS, totalDesp, saldo); salvarDados();
     }
 
-    function gerarPerspectivaIA(renda, despesas, saldo) {
-        const insightBox = document.getElementById('insight-box');
-        const insightText = document.getElementById('insight-text');
+    function gerarPerspectiva(r, d, s) {
+        const box = document.getElementById('insight-box'); const txt = document.getElementById('insight-text');
+        box.className = 'insight-box'; // Reseta classes
+        if (r === 0 && d === 0) return txt.innerText = "Adicione seus ganhos e gastos para ver a análise.";
+        const perc = r > 0 ? (d / r) * 100 : 100;
         
-        if (renda === 0 && despesas === 0) {
-            insightBox.style.borderLeftColor = "var(--text-muted)";
-            insightBox.style.backgroundColor = "#f3f4f6";
-            insightText.innerHTML = "<strong>Assistente:</strong> Preencha seus valores para que eu possa analisar o seu mês.";
-            return;
-        }
-
-        const percentualGasto = renda > 0 ? (despesas / renda) * 100 : 100;
-        
-        if (saldo < 0) {
-            insightBox.style.borderLeftColor = "var(--danger)";
-            insightBox.style.backgroundColor = "#fef2f2";
-            insightText.innerHTML = `🚨 <strong>Alerta Vermelho!</strong> Você ultrapassou sua renda em R$ ${Math.abs(saldo).toFixed(2)}. Revise suas despesas variáveis urgentemente.`;
-        } else if (percentualGasto >= 80) {
-            insightBox.style.borderLeftColor = "var(--warning)";
-            insightBox.style.backgroundColor = "#fffbeb";
-            insightText.innerHTML = `⚠️ <strong>Atenção:</strong> Você já comprometeu ${percentualGasto.toFixed(1)}% do seu salário. Evite novos gastos no cartão de crédito este mês.`;
-        } else if (percentualGasto >= 50) {
-            insightBox.style.borderLeftColor = "var(--primary)";
-            insightBox.style.backgroundColor = "#eef2ff";
-            insightText.innerHTML = `👍 <strong>Tudo sob controle!</strong> Você gastou ${percentualGasto.toFixed(1)}% da sua renda. Que tal investir parte dos R$ ${saldo.toFixed(2)} que sobraram?`;
-        } else {
-            insightBox.style.borderLeftColor = "var(--success)";
-            insightBox.style.backgroundColor = "#f0fdf4";
-            insightText.innerHTML = `🌟 <strong>Excelente!</strong> Seus gastos estão muito baixos (${percentualGasto.toFixed(1)}%). Você tem um cenário financeiro altamente saudável este mês!`;
-        }
+        if (s < 0) { box.classList.add('alerta'); txt.innerHTML = `⚠️ Faltam R$ ${Math.abs(s).toFixed(2)} para cobrir as contas.`; }
+        else if (perc >= 80) { box.classList.add('atencao'); txt.innerHTML = `⚡ Você já comprometeu ${perc.toFixed(0)}% da renda. Cuidado!`; }
+        else { txt.innerHTML = `✅ Saúde financeira em dia! Sobram R$ ${s.toFixed(2)} este mês.`; }
     }
 
-    function salvarDados() {
-        localStorage.setItem('orcamento_dados', JSON.stringify(dadosApp));
-        atualizarGrafico();
-    }
+    function salvarDados() { localStorage.setItem('orcamento_dados', JSON.stringify(dadosApp)); atualizarGrafico(); }
 
     function atualizarGrafico() {
         const ctx = document.getElementById('graficoHistorico').getContext('2d');
         const meses = Object.keys(dadosApp).sort();
-        const historicoDespesas = []; const historicoReceitas = [];
-
+        const [desp, rec] = [[], []];
         meses.forEach(m => {
-            const somar = (arr) => arr.reduce((acc, curr) => acc + (parseFloat(curr.valor) || 0), 0);
-            historicoReceitas.push(somar(dadosApp[m].salario));
-            historicoDespesas.push(somar(dadosApp[m].fixas) + somar(dadosApp[m].variaveis) + somar(dadosApp[m].cartao));
+            const somar = arr => arr.reduce((acc, curr) => acc + (parseFloat(curr.valor) || 0), 0);
+            rec.push(somar(dadosApp[m].salario));
+            desp.push(somar(dadosApp[m].fixas) + somar(dadosApp[m].variaveis) + somar(dadosApp[m].cartao));
         });
-
-        if (grafico) { grafico.destroy(); }
-
+        if (grafico) grafico.destroy();
         grafico = new Chart(ctx, {
-            type: 'bar', // Mudado para barra para visualização mobile mais limpa
-            data: {
-                labels: meses.map(m => m.split('-').reverse().join('/')), // Formata ano-mes para mes/ano
-                datasets: [
-                    { label: 'Renda', data: historicoReceitas, backgroundColor: '#10b981', borderRadius: 4 },
-                    { label: 'Despesas', data: historicoDespesas, backgroundColor: '#ef4444', borderRadius: 4 }
-                ]
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } },
-                scales: { y: { beginAtZero: true } }
-            }
+            type: 'bar',
+            data: { labels: meses.map(m => m.split('-').reverse().join('/')), datasets: [{ label: 'Renda', data: rec, backgroundColor: '#059669' }, { label: 'Gasto', data: desp, backgroundColor: '#dc2626' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: true }, y: { display: false } } }
         });
-        
-        // Ajusta a altura do gráfico para telas de celular
-        document.querySelector('.chart-container').style.height = '250px';
     }
 </script>
 </body>
