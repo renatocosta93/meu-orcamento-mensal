@@ -1,0 +1,14 @@
+name: Lembrete Diario
+on:
+  schedule:
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+jobs:
+  notificar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enviar Telegram
+        run: |
+          curl -s -X POST https://api.telegram.org/bot8849135715:AAH6mHrNHmIlsDoPzesEj0nJO3wMI9GdEXc/sendMessage \
+          -d chat_id=1020154663 \
+          -d text="Chegou a hora de fazer a atualização do seu orçamento mensal. Inclua as despesas ou receitas do dia. Acesse: https://renatocosta93.github.io/meu-orcamento-mensal/"
